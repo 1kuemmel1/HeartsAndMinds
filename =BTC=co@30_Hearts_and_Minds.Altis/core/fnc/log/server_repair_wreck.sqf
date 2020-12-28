@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        _veh = [my_vehicle] call btc_fnc_log_server_repair_wreck;
+        _veh = [my_vehicle] spawn btc_fnc_log_server_repair_wreck;
     (end)
 
 Author:
@@ -32,15 +32,10 @@ if (_veh in _blacklist) exitWith {
 private _type = typeOf _veh;
 (getPosASL _veh) params ["_x", "_y", "_z"];
 private _dir = getDir _veh;
-private _customization = [_veh] call BIS_fnc_getVehicleCustomization;
 private _marker = _veh getVariable ["marker", ""];
-private _isMedicalVehicle = [_veh] call ace_medical_fnc_isMedicalVehicle;
-private _isRepairVehicle = [_veh] call ace_repair_fnc_isRepairVehicle;
-private _fuelSource = [
-    [_veh] call ace_refuel_fnc_getFuel,
-    _veh getVariable ["ace_refuel_hooks", []]
-];
-private _pylons = getPylonMagazines _veh;
+private _vehProperties = [_veh] call btc_fnc_getVehProperties;
+_vehProperties set [5, false];
+private _EDENinventory = _veh getVariable ["btc_EDENinventory", []];
 
 btc_vehicles = btc_vehicles - [_veh];
 
@@ -48,8 +43,15 @@ if (_marker != "") then {
     deleteMarker _marker;
     remoteExecCall ["", _marker];
 };
-deleteVehicle _veh;
-sleep 1;
-_veh = [_type, [_x, _y, 0.5 + _z], _dir, _customization, _isMedicalVehicle, _isRepairVehicle, _fuelSource, _pylons] call btc_fnc_log_createVehicle;
 
-_veh
+if !((getVehicleCargo _veh) isEqualTo []) then {
+    _veh setVehicleCargo objNull;
+};
+
+[{
+    deleteVehicle _this;
+}, _veh] call CBA_fnc_execNextFrame;
+
+[{
+    _this call btc_fnc_log_createVehicle;
+}, [_type, [_x, _y, 0.5 + _z], _dir] + _vehProperties + [_EDENinventory], 1] call CBA_fnc_waitAndExecute;

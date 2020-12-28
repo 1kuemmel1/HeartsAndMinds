@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        [] spawn btc_fnc_side_supply;
+        [false, "btc_fnc_side_supply"] spawn btc_fnc_side_create;
     (end)
 
 Author:
@@ -24,17 +24,17 @@ params [
     ["_taskID", "btc_side", [""]]
 ];
 
-private _useful = btc_city_all select {!((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])} ;
+private _useful = btc_city_all select {!(isNull _x) && !((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])} ;
 
-if (_useful isEqualTo []) then {_useful = + btc_city_all;};
+if (_useful isEqualTo []) then {_useful = + (btc_city_all select {!(isNull _x)});};
 
 private _city = selectRandom _useful;
 private _pos = [getPos _city, 100] call btc_fnc_randomize_pos;
-_pos = [_pos, 0, 300, 20, false] call btc_fnc_findsafepos;
+_pos = [_pos, 0, _city getVariable ["radius", 100], 20, false] call btc_fnc_findsafepos;
 
-private _jip = [_taskID, 3, getPos _city, _city getVariable "name"] call btc_fnc_task_create;
+[_taskID, 3, getPos _city, _city getVariable "name"] call btc_fnc_task_create;
 private _move_taskID = _taskID + "mv";
-private _jipMove = [[_move_taskID, _taskID], 18, _pos, btc_supplies_cargo] call btc_fnc_task_create;
+[[_move_taskID, _taskID], 18, _pos, btc_supplies_cargo] call btc_fnc_task_create;
 
 private _area = createMarker [format ["sm_%1", _pos], _pos];
 _area setMarkerShape "ELLIPSE";
@@ -96,18 +96,18 @@ waitUntil {sleep 5; (_move_taskID call BIS_fnc_taskCompleted || !((nearestObject
 private _drop_taskID = _taskID + "dr";
 if !(_move_taskID call BIS_fnc_taskState isEqualTo "CANCELED") then {
     [_move_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;
-    private _jipDrop = [[_drop_taskID, _taskID], 19,
-    (nearestObjects [_pos, [btc_supplies_cargo] + _food + _water, 30]) select 0,
-    selectRandom(_food + _water), true] call btc_fnc_task_create;
+    [
+        [_drop_taskID, _taskID], 19,
+        (nearestObjects [_pos, [btc_supplies_cargo] + _food + _water, 30]) select 0,
+        selectRandom(_food + _water), true
+    ] call btc_fnc_task_create;
 };
 
 [getPos _city, _pos getPos [10, _direction_composition]] call btc_fnc_civ_evacuate;
 
-waitUntil {sleep 5; (_move_taskID call BIS_fnc_taskState isEqualTo "CANCELED" || _drop_taskID call BIS_fnc_taskCompleted || (count (nearestObjects [_pos, _food + _water, 30]) >= 2))};
+waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || (count (nearestObjects [_pos, _food + _water, 30]) >= 2))};
 
-if (_drop_taskID call BIS_fnc_taskState isEqualTo "CANCELED" ||
-    _move_taskID call BIS_fnc_taskState isEqualTo "CANCELED"
-) exitWith {
+if (_taskID call BIS_fnc_taskState isEqualTo "CANCELED") exitWith {
     [[_area], _composition_objects] call btc_fnc_delete;
 };
 

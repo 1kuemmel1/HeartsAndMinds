@@ -25,7 +25,7 @@ params [
 ];
 
 //// Choose a Marine location \\\\
-private _useful = btc_city_all select {_x getVariable ["type", ""] isEqualTo "NameMarine" || _x getVariable ["hasbeach", false]};
+private _useful = btc_city_all select {!(isNull _x) && _x getVariable ["type", ""] isEqualTo "NameMarine" || _x getVariable ["hasbeach", false]};
 
 if (_useful isEqualTo []) exitWith {[] spawn btc_fnc_side_create;};
 
@@ -34,7 +34,7 @@ private _pos = getPos _city;
 
 //// Choose a random position \\\\
 private _vehpos = [_pos, 0, 600, 20, 2, 60 * (pi / 180), 0] call BIS_fnc_findSafePos;
-_vehpos = [_vehpos select 0 , _vehpos select 1, 0];
+_vehpos = [_vehpos select 0, _vehpos select 1, 0];
 
 //// Create civ on _vehpos \\\\
 private _veh_type = selectRandom btc_civ_type_boats;
@@ -50,16 +50,14 @@ private _index = 1 + floor (random (_veh emptyPositions "cargo"));
 _unit assignAsCargoIndex [_veh, _index];
 _unit moveinCargo [_veh, _index];
 
-private _jip = [_taskID, 10, _unit, [_city getVariable "name", _veh_type]] call btc_fnc_task_create;
+[_taskID, 10, _unit, [_city getVariable "name", _veh_type]] call btc_fnc_task_create;
 
 sleep 1;
 waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !(playableUnits inAreaArray [getPosWorld _unit, 5000, 5000] isEqualTo []))};
+
 [_unit] call btc_fnc_set_damage;
-_unit setVariable ["ace_medical_ai_treatmentoverat", CBA_missionTime + 10000]; //Disable AI to self healing
 
-[_group] call btc_fnc_civ_unit_create;
-
-waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !alive _unit || {_unit call ace_medical_fnc_isInStableCondition && [_unit] call ace_common_fnc_isAwake})};
+waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !alive _unit || {_unit call ace_medical_status_fnc_isInStableCondition && [_unit] call ace_common_fnc_isAwake})};
 
 [[], [_veh, _group]] call btc_fnc_delete;
 

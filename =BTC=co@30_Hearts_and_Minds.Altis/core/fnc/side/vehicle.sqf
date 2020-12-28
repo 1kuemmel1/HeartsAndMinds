@@ -24,7 +24,7 @@ params [
     ["_taskID", "btc_side", [""]]
 ];
 
-private _useful = btc_city_all select {_x getVariable ["type", ""] != "NameMarine"};
+private _useful = btc_city_all select {!(isNull _x) && _x getVariable ["type", ""] != "NameMarine"};
 if (_useful isEqualTo []) exitWith {[] spawn btc_fnc_side_create;};
 private _city = selectRandom _useful;
 
@@ -38,7 +38,7 @@ _veh setDir (random 360);
 _veh setDamage 0.7;
 _veh setHit ["wheel_1_1_steering", 1];
 
-private _jip = [_taskID, 5, _veh, [_city getVariable "name", _veh_type]] call btc_fnc_task_create;
+[_taskID, 5, _veh, [_city getVariable "name", _veh_type]] call btc_fnc_task_create;
 
 waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || (_veh getHit "wheel_1_1_steering" < 1) || !alive _veh)};
 

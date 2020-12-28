@@ -62,4 +62,16 @@ class CfgTaskTypes {
     class Handcuff {
         icon = \z\ace\addons\captives\UI\handcuff_ca.paa;
     };
+    class Dogtags {
+        icon = \z\ace\addons\dogtags\data\dogtag_icon_ca.paa;
+    };
+    class Danger {
+        icon = \A3\ui_f\data\igui\cfg\simpleTasks\types\danger_ca.paa;
+    };
+    class Antenna {
+        icon = \A3\Data_F_Enoch\Logos\arma3_enoch_logo_ca.paa;
+    };
+    class Use {
+        icon = \A3\ui_f\data\igui\cfg\simpleTasks\types\use_ca.paa;
+    };
 };

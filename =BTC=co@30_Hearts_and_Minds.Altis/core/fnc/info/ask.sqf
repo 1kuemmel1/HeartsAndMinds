@@ -30,7 +30,7 @@ if !(player getVariable ["interpreter", false]) exitWith {
     [name _man, localize "STR_BTC_HAM_CON_INFO_ASKREP_NOINTER"] call btc_fnc_showSubtitle;
 };
 
-if !(_man call ace_medical_fnc_isInStableCondition) exitWith {
+if !(_man call ace_medical_status_fnc_isInStableCondition) exitWith {
     private _complain = selectRandom [
         localize "STR_BTC_HAM_CON_INFO_ASK_WOUNDED1",
         localize "STR_BTC_HAM_CON_INFO_ASK_WOUNDED2",
@@ -71,13 +71,7 @@ if (_info_type isEqualTo "NO") exitWith {
     [name _man, localize "STR_BTC_HAM_CON_INFO_ASK_NOINFO"] call btc_fnc_showSubtitle;
 };
 
-btc_int_ask_data = nil;
-[8] remoteExecCall ["btc_fnc_int_ask_var", 2];
-
-waitUntil {!(isNil "btc_int_ask_data")};
-
-private _final_phase = btc_int_ask_data isEqualTo 0;
-
+private _final_phase = (count btc_hideouts) isEqualTo 0;
 private _info = selectRandomWeighted [
     "TROOPS", 0.4,
     ["HIDEOUT", "TROOPS"] select _final_phase, 0.4,
@@ -88,10 +82,10 @@ switch (_info_type) do {
     case "REAL" : {
         switch (_info) do {
             case "TROOPS" : {
-                [name _man, true] spawn btc_fnc_info_troops;
+                [name _man, true] call btc_fnc_info_troops;
             };
             case "HIDEOUT" : {
-                [name _man, true] spawn btc_fnc_info_hideout_asked;
+                [name _man, true] call btc_fnc_info_hideout_asked;
             };
             case "CACHE" : {
                 [name _man, localize "STR_BTC_HAM_CON_INFO_ASK_CACHEMAP"] call btc_fnc_showSubtitle;
@@ -103,10 +97,10 @@ switch (_info_type) do {
     case "FAKE" : {
         switch (_info) do {
             case "TROOPS" : {
-                [name _man, false] spawn btc_fnc_info_troops;
+                [name _man, false] call btc_fnc_info_troops;
             };
             case "HIDEOUT" : {
-                [name _man, false] spawn btc_fnc_info_hideout_asked;
+                [name _man, false] call btc_fnc_info_hideout_asked;
             };
             case "CACHE" : {
                 [name _man, localize "STR_BTC_HAM_CON_INFO_ASK_CACHEMAP"] call btc_fnc_showSubtitle;

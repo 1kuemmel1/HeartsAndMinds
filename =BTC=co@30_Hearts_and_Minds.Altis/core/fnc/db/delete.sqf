@@ -3,17 +3,17 @@
 Function: btc_fnc_db_delete
 
 Description:
-    Fill me when you edit me !
+    Delete database.
 
 Parameters:
     _showHint - Show the hint telling the database has been deleted. [Boolean]
-    _name - [String]
+    _name - Name of the current database. [String]
 
 Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_db_delete;
+        [] call btc_fnc_db_delete;
     (end)
 
 Author:
@@ -36,6 +36,7 @@ profileNamespace setVariable [format ["btc_hm_%1_rep", _name], nil];
 profileNamespace setVariable [format ["btc_hm_%1_fobs", _name], nil];
 profileNamespace setVariable [format ["btc_hm_%1_vehs", _name], nil];
 profileNamespace setVariable [format ["btc_hm_%1_objs", _name], nil];
+profileNamespace setVariable [format ["btc_hm_%1_tags", _name], nil];
 profileNamespace setVariable [format ["btc_hm_%1_markers", _name], nil];
 profileNamespace setVariable [format ["btc_hm_%1_db", _name], nil];
 

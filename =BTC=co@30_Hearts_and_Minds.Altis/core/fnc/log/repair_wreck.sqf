@@ -24,7 +24,7 @@ params [
     ["_object", objNull, [objNull]]
 ];
 
-private _array = (nearestObjects [_object, ["LandVehicle", "Air"], 10]) select {!(
+private _array = (nearestObjects [_object, ["LandVehicle", "Air", "Ship"], 10]) select {!(
     _x isKindOf "ACE_friesBase" OR
     _x isKindOf "ace_fastroping_helper"
 )};
@@ -33,4 +33,4 @@ if (_array isEqualTo []) exitWith {(localize "STR_BTC_HAM_LOG_RWRECK_NOWRECK") c
 
 if (damage (_array select 0) != 1) exitWith {(localize "STR_BTC_HAM_LOG_RWRECK_NOTWRECK") call CBA_fnc_notify};
 
-[_array select 0] remoteExec ["btc_fnc_log_server_repair_wreck", 2];
+[_array select 0] remoteExecCall ["btc_fnc_log_server_repair_wreck", 2];

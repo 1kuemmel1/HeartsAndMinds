@@ -3,17 +3,17 @@
 Function: btc_fnc_rep_killed
 
 Description:
-    Fill me when you edit me !
+    Change reputation when a player kill a unit.
 
 Parameters:
-    _unit - [Object]
-    _killer - [Object]
+    _unit - Unit killed. [Object]
+    _killer - Killer. [Object]
 
 Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_rep_killed;
+        [cursorObject, player] call btc_fnc_rep_killed;
     (end)
 
 Author:
@@ -21,27 +21,23 @@ Author:
 
 ---------------------------------------------------------------------------- */
 
-params [
-    ["_unit", objNull, [objNull]],
-    ["_killer", objNull, [objNull]]
-];
+params ["_unit", "_causeOfDeath", "_killer", "_instigator"];
 
-if (!isServer) exitWith {
-    _this remoteExecCall ["btc_fnc_rep_killed", 2];
-};
+if (
+    !(side group _unit isEqualTo civilian) &&
+    {!isAgent teamMember _unit}
+) exitWith {};
 
-if (isPlayer _killer) then {
-    btc_rep_malus_civ_killed call btc_fnc_rep_change;
+if (isPlayer _instigator) then {
+    [
+        [btc_rep_malus_civ_killed, btc_rep_malus_animal_killed] select (isAgent teamMember _unit),
+        _instigator
+    ] call btc_fnc_rep_change;
     if (btc_global_reputation < 600) then {
-        [getPos _unit] spawn btc_fnc_rep_eh_effects;
+        [getPos _unit] call btc_fnc_rep_eh_effects;
     };
 
     if (btc_debug_log) then {
         [format ["GREP %1 THIS = %2", btc_global_reputation, _this], __FILE__, [false]] call btc_fnc_debug_message;
     };
-};
-
-private _vehicle = assignedVehicle _unit;
-if !(_vehicle isEqualTo objNull) then {
-    [[], [_vehicle]] call btc_fnc_delete;
 };

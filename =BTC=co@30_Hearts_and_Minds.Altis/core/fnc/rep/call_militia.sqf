@@ -41,12 +41,7 @@ if (btc_debug_log) then {
 };
 
 if (_start_pos isEqualTo objNull) then {
-    {
-        private _city = _x;
-        if (_pos distance _city > 300 && {_city inArea [_pos, 2500, 2500, 0, false]} && {_players inAreaArray [getPosWorld _city, 500, 500] isEqualTo []}) then {
-            _start_pos = _city;
-        };
-    } forEach (btc_city_all select {!(isNull _x)});
+    _start_pos = [_pos, btc_city_all select {!(isNull _x) && !(_x getVariable ["active", false]) && _x getVariable ["type", ""] != "NameMarine"}, false] call btc_fnc_find_closecity;
 };
 
 private _ratio = if (_pos distance _start_pos > 1000) then {0.2} else {0.6};
@@ -58,16 +53,16 @@ if (btc_debug_log) then {
 if ((random 1) > _ratio) then {
     //MOT
     private _group = [_start_pos, _pos, 1] call btc_fnc_mil_send;
-    [_group, _pos, 60, "UNLOAD"] call CBA_fnc_addWaypoint;
-    [_group, _pos, 60, "SAD"] call CBA_fnc_addWaypoint;
+    [_group, _pos, -1, "UNLOAD", nil, nil, nil, nil, nil, nil, 60] call CBA_fnc_addWaypoint;
+    [_group, _pos, -1, "SAD", nil, nil, nil, nil, nil, nil, 60] call CBA_fnc_addWaypoint;
 
     if (btc_debug_log) then {
-        [format ["MOT %1/%2 POS %3", _group, typeOf _veh, _pos], __FILE__, [false]] call btc_fnc_debug_message;
+        [format ["MOT %1 POS %2", _group, _pos], __FILE__, [false]] call btc_fnc_debug_message;
     };
 } else {
     //INF
     private _group = [_start_pos, _pos, 0, "", "WEDGE"] call btc_fnc_mil_send;
-    [_group, _pos, 60, "SAD"] call CBA_fnc_addWaypoint;
+    [_group, _pos, -1, "SAD", nil, nil, nil, nil, nil, nil, 60] call CBA_fnc_addWaypoint;
 
     if (btc_debug_log) then {
         [format ["INF %1", _group], __FILE__, [false]] call btc_fnc_debug_message;

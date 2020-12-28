@@ -3,12 +3,12 @@
 Function: btc_fnc_db_loadCargo
 
 Description:
-    Fill me when you edit me !
+    Load ACE cargo and inventory of a vehicle/container.
 
 Parameters:
-    _obj - []
-    _cargo - []
-    _inventory - []
+    _obj - Vehicle or container. [Object]
+    _cargo - Object to load in ACE cargo. [Array]
+    _inventory - Weapon and item to load in inventory. [Array]
 
 Returns:
 
@@ -27,7 +27,7 @@ Author:
 
     //handle cargo
     {
-        _x params ["_type", "_magClass", "_cargo_obj"];
+        _x params ["_type", "_magClass", "_cargo_obj", ["_isContaminated", false, [false]]];
 
         private _l = createVehicle [_type, getPosATL _obj, [], 0, "CAN_COLLIDE"];
         [_l] call btc_fnc_log_init;
@@ -41,6 +41,11 @@ Author:
         };
 
         [_l, _cargo_obj] call btc_fnc_log_setCargo;
+
+        if (_isContaminated) then {
+            btc_chem_contaminated pushBack _l;
+            publicVariable "btc_chem_contaminated";
+        };
     } forEach _cargo;
 
     //set inventory content for weapons, magazines and items

@@ -25,7 +25,7 @@ params [
 ];
 
 //// Choose a clear City \\\\
-private _useful = btc_city_all select {!(_x getVariable ["occupied", false]) && !((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])};
+private _useful = btc_city_all select {!(isNull _x) && !(_x getVariable ["occupied", false]) && !((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])};
 if (_useful isEqualTo []) exitWith {[] spawn btc_fnc_side_create;};
 private _city = selectRandom _useful;
 private _pos = getPos _city;
@@ -77,18 +77,16 @@ private _unit =_group createUnit [_unit_type, _pos, [], 0, "CAN_COLLIDE"];
 _unit setBehaviour "CARELESS";
 _unit setDir (random 360);
 _unit setUnitPos "DOWN";
-[_group] call btc_fnc_civ_unit_create;
 
-private _jip = [_taskID, 8, _unit, _city getVariable "name"] call btc_fnc_task_create;
+[_taskID, 8, _unit, [_city getVariable "name", _unit_type]] call btc_fnc_task_create;
 
 sleep 1;
 
 waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !(playableUnits inAreaArray [getPosWorld _unit, 5000, 5000] isEqualTo []))};
 
 [_unit] call btc_fnc_set_damage;
-_unit setVariable ["ace_medical_ai_treatmentoverat", CBA_missionTime + 10000]; //Disable AI to self healing
 
-waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !alive _unit || {_unit call ace_medical_fnc_isInStableCondition && [_unit] call ace_common_fnc_isAwake})};
+waitUntil {sleep 5; (_taskID call BIS_fnc_taskCompleted || !alive _unit || {_unit call ace_medical_status_fnc_isInStableCondition && [_unit] call ace_common_fnc_isAwake})};
 
 [[], [_veh, _fx, _group]] call btc_fnc_delete;
 

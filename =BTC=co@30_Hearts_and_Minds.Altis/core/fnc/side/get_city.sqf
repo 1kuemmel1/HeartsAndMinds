@@ -24,13 +24,13 @@ params [
     ["_taskID", "btc_side", [""]]
 ];
 
-private _useful = btc_city_all select {(_x getVariable ["occupied", false]) && !((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])};
+private _useful = btc_city_all select {!(isNull _x) && (_x getVariable ["occupied", false]) && !((_x getVariable ["type", ""]) in ["NameLocal", "Hill", "NameMarine"])};
 if (_useful isEqualTo []) exitWith {[] spawn btc_fnc_side_create;};
 
 private _city = selectRandom _useful;
 private _pos = getPos _city;
 
-private _jip = [_taskID, 6, _pos, _city getVariable "name"] call btc_fnc_task_create;
+[_taskID, 6, _pos, _city getVariable "name"] call btc_fnc_task_create;
 
 _city setVariable ["spawn_more", true];
 
