@@ -42,7 +42,7 @@ params [
 _wp_ratios params ["_wp_house_probability", "_wp_sentry_probability"];
 
 // Find a position
-([_city] call btc_fnc_city_findPos) params ["_rpos", "_pos_iswater"];
+([_city, _area] call btc_fnc_city_findPos) params ["_rpos", "_pos_iswater"];
 
 private _group = createGroup _enemy_side;
 private _groups = [];
@@ -69,7 +69,7 @@ switch (true) do {
     };
     case (_wp > _wp_sentry_probability) : {
         [_group, _rpos, _n, _pos_iswater] call btc_fnc_mil_createUnits;
-        [_group, _rpos, 0, "SENTRY", "AWARE", "RED"] call CBA_fnc_addWaypoint;
+        [_group, _rpos, -1, "SENTRY", "AWARE", "RED"] call CBA_fnc_addWaypoint;
     };
 };
 
