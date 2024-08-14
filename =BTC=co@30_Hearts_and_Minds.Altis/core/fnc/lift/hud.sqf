@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_lift_hud
+Function: btc_lift_fnc_hud
 
 Description:
     Fill me when you edit me !
@@ -11,13 +11,16 @@ Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_lift_hud;
+        _result = [] call btc_lift_fnc_hud;
     (end)
 
 Author:
     Giallustio
 
 ---------------------------------------------------------------------------- */
+
+btc_lift_hud = !btc_lift_hud;
+if !(btc_lift_hud) exitWith {};
 
 disableSerialization;
 
@@ -39,6 +42,6 @@ private _arrow_down = "\A3\ui_f\data\igui\cfg\actions\arrow_down_gs.paa";
 private _complete   = "\A3\ui_f\data\map\markers\nato\b_unknown.paa";
 private _incomplete = "\A3\ui_f\data\map\markers\nato\b_unknown.paa";
 
-[btc_fnc_lift_hudLoop, 0,
+[btc_lift_fnc_hudLoop, 0,
     [_arrow_up, _arrow_down, _complete, _incomplete, _obj_img, _obj_pic, _arrow, _obj_name, _obj_alt]
 ] call CBA_fnc_addPerFrameHandler;

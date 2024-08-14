@@ -20,38 +20,37 @@ Author:
 ---------------------------------------------------------------------------- */
 
 ["btc_dty", "SUCCEEDED"] call BIS_fnc_taskSetState;
-[["btc_sze", "btc_m"], 2] call btc_fnc_task_create;
+[["btc_sze", "btc_m"], 2] call btc_task_fnc_create;
 
 btc_final_phase = true;
 
 btc_city_remaining = [];
 {
-    if (_x getVariable ["type", ""] != "NameMarine") then {
-        if (_x getVariable ["marker", ""] != "") then {
-            deleteMarker (_x getVariable ["marker", ""]);
+    if (_y getVariable ["type", ""] != "NameMarine") then {
+        if (_y getVariable ["marker", ""] != "") then {
+            deleteMarker (_y getVariable ["marker", ""]);
         };
-        private _radius_x = _x getVariable ["RadiusX", 500];
-        private _radius_y = _x getVariable ["RadiusY", 500];
+        private _cachingRadius = _y getVariable ["cachingRadius", 500];
 
-        private _marker = createMarker [format ["city_%1", position _x], position _x];
+        private _marker = createMarker [format ["city_%1", position _y], position _y];
         _marker setMarkerShape "ELLIPSE";
         _marker setMarkerBrush "SolidBorder";
-        _marker setMarkerSize [_radius_x + _radius_y, _radius_x + _radius_y];
+        _marker setMarkerSize [_cachingRadius, _cachingRadius];
         _marker setMarkerAlpha 0.3;
-        if (_x getVariable ["occupied", false]) then {
+        if (_y getVariable ["occupied", false]) then {
             _marker setMarkerColor "colorRed";
-            btc_city_remaining pushBack _x;
+            btc_city_remaining pushBack _y;
         } else {
             _marker setMarkerColor "colorGreen";
             _marker setMarkerAlpha 0;
         };
-        _x setVariable ["marker", _marker];
+        _y setVariable ["marker", _marker];
     };
-} forEach (btc_city_all select {!(isNull _x)});
+} forEach btc_city_all;
 
 waitUntil {sleep 15; (btc_city_remaining isEqualTo [])};
 
-["btc_m", "SUCCEEDED"] call btc_fnc_task_setState;
+["btc_m", "SUCCEEDED"] call btc_task_fnc_setState;
 
 //END
 [] remoteExec ["btc_fnc_end_mission", 0, true];

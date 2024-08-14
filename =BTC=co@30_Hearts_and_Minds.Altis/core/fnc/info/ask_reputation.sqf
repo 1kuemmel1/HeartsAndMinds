@@ -1,18 +1,18 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_info_ask_reputation
+Function: btc_info_fnc_ask_reputation
 
 Description:
-    Fill me when you edit me !
+    Ask reputation level and display it.
 
 Parameters:
-    _man - [Object]
+    _man - Man. [Object]
 
 Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_info_ask_reputation;
+        cursorObject call btc_info_fnc_ask_reputation;
     (end)
 
 Author:
@@ -29,7 +29,7 @@ if !(player getVariable ["interpreter", false]) exitWith {
 };
 
 btc_int_ask_data = nil;
-["btc_global_reputation"] remoteExecCall ["btc_fnc_int_ask_var", 2];
+["btc_global_reputation"] remoteExecCall ["btc_int_fnc_ask_var", 2];
 
 waitUntil {!(isNil "btc_int_ask_data")};
 
@@ -37,19 +37,14 @@ private _rep = btc_int_ask_data;
 
 private _ho_left = "";
 if ((round random 1) isEqualTo 1) then {
-    btc_int_ask_data = nil;
-    [8] remoteExecCall ["btc_fnc_int_ask_var", 2];
-
-    waitUntil {!(isNil "btc_int_ask_data")};
-
-    _ho_left = format [localize "STR_BTC_HAM_CON_INFO_ASKREP_HIDEOUTS", btc_int_ask_data];
+    _ho_left = format [localize "STR_BTC_HAM_CON_INFO_ASKREP_HIDEOUTS", count btc_hideouts];
 };
 
 private _info_type = switch (true) do {
-    case (_rep < 200): {localize "STR_BTC_HAM_CON_INFO_ASKREP_VLOW"};
-    case (_rep >= 200 && _rep < 500): {localize "STR_BTC_HAM_CON_INFO_ASKREP_LOW"};
-    case (_rep >= 500 && _rep < 750): {toLower localize "str_terrain_12_5"};
-    case (_rep >= 750): {localize "str_terrain_6_25"};
+    case (_rep < btc_rep_level_low): {localize "STR_BTC_HAM_CON_INFO_ASKREP_VLOW"};
+    case (_rep >= btc_rep_level_low && _rep < btc_rep_level_normal): {localize "STR_BTC_HAM_CON_INFO_ASKREP_LOW"};
+    case (_rep >= btc_rep_level_normal && _rep < btc_rep_level_high): {toLower localize "str_terrain_12_5"};
+    case (_rep >= btc_rep_level_high): {localize "str_terrain_6_25"};
 };
 
 private _text = selectRandom [

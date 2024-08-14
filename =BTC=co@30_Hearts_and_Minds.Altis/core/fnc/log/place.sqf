@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_log_place
+Function: btc_log_fnc_place
 
 Description:
     Carry and place an object with keys.
@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        [cursorObject] call btc_fnc_log_place;
+        [cursorObject] call btc_log_fnc_place;
     (end)
 
 Author:
@@ -50,7 +50,7 @@ private _actionEH = [player, "DefaultAction", {true}, {btc_log_placing = false;}
 [localize "STR_BTC_HAM_LOG_PLACE_RELEASE", ""] call ace_interaction_fnc_showMouseHint;
 
 //add actions to keys
-private _place_EH_keydown = (findDisplay 46) displayAddEventHandler ["KeyDown", btc_fnc_log_place_key_down];
+private _place_EH_keydown = (findDisplay 46) displayAddEventHandler ["KeyDown", btc_log_fnc_place_key_down];
 
 [player] call ace_weaponselect_fnc_putWeaponAway;
 player forceWalk true;
@@ -72,6 +72,9 @@ btc_log_placing_d = 1.5 + abs(((_bbr select 1) select 1) - ((_bbr select 0) sele
 
     if (!alive player || player getVariable ["ACE_isUnconscious", false] || !btc_log_placing || (vehicle player != player)) then {
         _arguments params ["_placing_obj", "_actionEH", "_place_EH_keydown"];
+
+        ["ace_common_fixCollision", player] call CBA_fnc_localEvent;
+        ["ace_common_fixCollision", btc_log_placing_obj, btc_log_placing_obj] call CBA_fnc_targetEvent;
 
         //remove PFH
         [_idPFH] call CBA_fnc_removePerFrameHandler;

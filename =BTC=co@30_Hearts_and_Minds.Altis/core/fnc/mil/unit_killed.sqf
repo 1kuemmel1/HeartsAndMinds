@@ -1,19 +1,20 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_mil_unit_killed
+Function: btc_mil_fnc_unit_killed
 
 Description:
-    Fill me when you edit me !
+    Handle intel and reputation when an enemy is killed.
 
 Parameters:
-    _unit - [Object]
-    _killer - [Object]
+    _unit - Object the event handler is assigned to. [Object]
+    _killer - Object that killed the unit. Contains the unit itself in case of collisions. [Object]
+    _instigator - Person who pulled the trigger. [Object]
 
 Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_mil_unit_killed;
+        _result = [] call btc_mil_fnc_unit_killed;
     (end)
 
 Author:
@@ -21,26 +22,30 @@ Author:
 
 ---------------------------------------------------------------------------- */
 
-params [
-    ["_unit", objNull, [objNull]],
-    ["_killer", objNull, [objNull]]
-];
+params ["_unit", "_causeOfDeath", "_killer", "_instigator"];
 
-private _killer = _unit getVariable ["ace_medical_lastDamageSource", _killer];
-
-if (!isServer) exitWith {
-    [_unit, _killer] remoteExecCall ["btc_fnc_mil_unit_killed", 2];
-};
+if (side group _unit isNotEqualTo btc_enemy_side) exitWith {};
 
 if (random 100 > btc_info_intel_chance) then {
     _unit setVariable ["intel", true];
 };
 
-if (isPlayer _killer) then {
-    if (isServer) then {
-        btc_rep_bonus_mil_killed call btc_fnc_rep_change;
-    } else {
-        btc_rep_bonus_mil_killed remoteExecCall ["btc_fnc_rep_change", 2];
+if (
+    isPlayer _instigator ||
+    _killer isEqualTo btc_explosives_objectSide ||
+    isPlayer _killer
+) then {
+    private _repValue = btc_rep_bonus_mil_killed;
+    if (isNull _instigator && isPlayer _killer) then {
+        _instigator = _killer;
     };
+    if (
+        _unit getVariable ["ace_captives_isHandcuffed", false] ||
+        _unit getVariable ["ace_captives_isSurrendering", false]
+    ) then {
+        if (_causeOfDeath isNotEqualTo "CardiacArrest:Bleedout") then {
+            _repValue = btc_rep_malus_mil_killed;
+        };
+    };
+    [_repValue, _instigator] call btc_rep_fnc_change;
 };
-

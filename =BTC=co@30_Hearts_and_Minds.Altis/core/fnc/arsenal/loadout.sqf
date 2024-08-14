@@ -1,12 +1,12 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_arsenal_loadout
+Function: btc_arsenal_fnc_loadout
 
 Description:
     Generate a loadout from an array of defined loadout depending on trait, medical level, color and hour of the day.
 
 Parameters:
-    _type - Type of loadout: 0 - Rifleman, 1 - Medic, 2 - Repair, 3 - Engineer, 4 - Anti-Tank, 5 - Anti Air, 6 - Sniper, 7 - Machine gunner. [Number]
+    _type - Type of loadout: 0 - Rifleman, 1 - Medic, 2 - Repair, 3 - Engineer, 4 - Anti-Tank, 5 - Anti Air, 6 - Sniper, 7 - Machine gunner, 8 - CBRN, 9 - Drone hacker. [Number]
     _color - Color of skin loadout: 0 - Desert, 1 - Tropic, 2 - Black, 3 - Forest. [Number]
     _isDay - Select night (false) or day (true) loadout. [Boolean]
     _medicalParameters - Select the correct medical stuff depends on ACE3 medical parameters. [Array]
@@ -17,7 +17,7 @@ Returns:
 
 Examples:
     (begin example)
-        _rifleman_loadout = [0] call btc_fnc_arsenal_loadout;
+        _rifleman_loadout = [0] call btc_arsenal_fnc_loadout;
     (end)
     (begin example)
         [] spawn {
@@ -26,11 +26,11 @@ Examples:
                 {
                     private _j = _x;
                     {
-                        player setUnitLoadout ([_i, _j, _x] call btc_fnc_arsenal_loadout);
+                        player setUnitLoadout ([_i, _j, _x] call btc_arsenal_fnc_loadout);
                         sleep 1;
                     } forEach [false,true];
                 } forEach [0,1,2,3];
-            } forEach [0,1,2,3,4,5,6,7];
+            } forEach [0,1,2,3,4,5,6,7,8,9];
         };
     (end)
 
@@ -55,7 +55,7 @@ if (_color < 0) then {
             case (worldName in ["Tanoa", "lingor3"]): {
                 1
             };
-            case (worldName in ["chernarus", "Enoch", "sara"]): {
+            case (worldName in ["chernarus", "Enoch", "sara", "vt7", "cup_chernarus_A3", "chernarus_summer"]): {
                 3
             };
             default {
@@ -65,7 +65,7 @@ if (_color < 0) then {
     }
 };
 
-(_arsenal_loadout apply {_x select _color}) params ["_uniform", "_vest", "_helmet", "_hood", "_laserdesignator", "_night_vision", "_weapon", "_weapon_sniper", "_weapon_machineGunner", "_bipod", "_pistol", "_launcher_AT", "_launcher_AA", "_backpack", "_backpack_big", "_radio"];
+(_arsenal_loadout apply {_x select _color}) params ["_uniform", "_uniformCBRN", "_uniformSniper", "_vest", "_helmet", "_hood", "_hoodCBRN", "_laserdesignator", "_night_vision", "_weapon", "_weapon_sniper", "_weapon_machineGunner", "_bipod", "_pistol", "_launcher_AT", "_launcher_AA", "_backpack", "_backpack_big", "_backpackCBRN", "_radio"];
 
 if (_isDay isEqualType 0) then {
     (date call BIS_fnc_sunriseSunsetTime) params ["_sunrise", "_sunset"];
@@ -95,7 +95,28 @@ if (_fractures > 0) then {
 };
 _cargo_uniform append _medical;
 
-//Choose appropriats weapon/optics depends on _type
+private _uniform = switch (_type) do {
+    case 6: {
+        _uniformSniper
+    };
+    case 8: {
+        _uniformCBRN
+    };
+    default {
+        _uniform
+    };
+};
+
+private _hood = switch (_type) do {
+    case 8: {
+        _hoodCBRN
+    };
+    default {
+        _hood
+    };
+};
+
+//Choose appropriate weapon/optics depends on _type
 private _array = switch (_type) do {
     case 6: {
         [_weapon_sniper, ["ACE_optic_Hamr_2D", "ACE_optic_LRPS_2D"]];
@@ -145,24 +166,37 @@ if (_fractures > 0) then {
 private _cargos = [
     [],
     [_backpack, [["SmokeShellGreen", 3, 1], ["SmokeShellPurple", 1, 1]] + _backpackMedical],
-    [_backpack, [["ToolKit", 1], ["ACE_EntrenchingTool", 1]]],
+    [_backpack, [["ToolKit", 1], ["ACE_EntrenchingTool", 1], ["ACE_wirecutter", 1]]],
     [_backpack, [["ACE_DefusalKit", 1], ["ACE_Clacker", 2], ["ACE_SpraypaintRed", 1], ["DemoCharge_Remote_Mag", 2, 1], [["ACE_VMM3", "", "", "", [], [], ""], 1], ["ACE_EntrenchingTool", 1]]],
     [_backpack, [[_launcherMagazines param [1, _launcherMagazine], 1, _launcherCount], [_launcherMagazine, 1, _launcherCount]]],
     [_backpack_big, [[_launcherMagazine, 2, _launcherCount]]],
     [_backpack, [["ACE_Sandbag_empty", 1], ["ACE_Kestrel4500", 1], ["ACE_ATragMX", 1], ["ACE_RangeCard", 1], ["ACE_EntrenchingTool", 1]]],
-    []
+    [],
+    [_backpackCBRN, [["G_Respirator_white_F", 5]]],
+    [_backpack, [["muzzle_antenna_02_f", 1], ["muzzle_antenna_01_f", 1], [["hgun_esd_01_F", "", "", "", [], [], ""], 1]]]
 ];
 private _binocular_array = [_laserdesignator, "", "", "", ["Laserbatteries", 1], [], ""];
-private _launcher_array = [_launcher, "", "", "", [_launcherMagazine, _launcherCount], [], ""];
-private _radio_item = [["ItemRadio", ""] select (isClass(_cfgPatches >> "acre_main")), _radio] select (isClass (_cfgPatches >> "task_force_radio"));
+private _launcher_array = [[_launcher, "", "", "", [_launcherMagazine, _launcherCount], [], ""], []] select (_launcher isEqualTo "");
+private _radio_item = [
+    ["ItemRadio", ""] select (isClass(_cfgPatches >> "acre_main")),
+    _radio
+] select (isClass (_cfgPatches >> "task_force_radio"));
 
-if (_isDay) then {
+private _loadout = if (_isDay) then {
     [
         [_weapon, "", "", _optics select _isDay, [_weaponMagazine, _weaponCount], [], _bipod_item],
         _launcher_array,
         [_pistol, "", "", "", [_pistolMagazine, _pistolCount], [], ""],
         [_uniform, _cargo_uniform],
-        [_vest, [["SmokeShellGreen", 2, 1], [_weaponMagazine, 7, _weaponCount], ["SmokeShellPurple", 2, 1], ["SmokeShellYellow", 1, 1], [_pistolMagazine, 1, _pistolCount], ["ACE_M84", 1, 1], ["HandGrenade", 3, 1], [["", _radio] select (isClass(_cfgPatches >> "acre_main")), 1]]],
+        [_vest, [
+            ["SmokeShellGreen", 2, 1],
+            [_weaponMagazine, 7, _weaponCount],
+            ["SmokeShellPurple", 2, 1],
+            ["SmokeShellYellow", 1, 1],
+            [_pistolMagazine, 1, _pistolCount],
+            ["ACE_M84", 1, 1],
+            ["HandGrenade", 3, 1]
+        ]],
         _cargos select _type, _helmet, _hood, _binocular_array,
         ["ItemMap", "B_UavTerminal", _radio_item, "ItemCompass", "ChemicalDetector_01_watch_F", ""]
     ]
@@ -172,8 +206,23 @@ if (_isDay) then {
         _launcher_array,
         [_pistol, "", "", "", [_pistolMagazine, _pistolCount], [], ""],
         [_uniform, _cargo_uniform],
-        [_vest, [["SmokeShellGreen", 1, 1], ["B_IR_Grenade", 2, 1], [_weaponMagazines param [1, _weaponMagazine], 7, _weaponCount], ["Chemlight_green", 1, 1], ["Chemlight_blue", 1, 1], ["ACE_HandFlare_Green", 1, 1], ["HandGrenade", 3, 1], ["ACE_M84", 1, 1], [["", _radio] select (isClass(_cfgPatches >> "acre_main")), 1]]],
+        [_vest, [
+            ["SmokeShellGreen", 1, 1],
+            ["B_IR_Grenade", 2, 1],
+            [_weaponMagazines param [1, _weaponMagazine], 7, _weaponCount],
+            ["Chemlight_green", 1, 1],
+            ["Chemlight_blue", 1, 1],
+            ["ACE_HandFlare_Green", 1, 1],
+            ["HandGrenade", 3, 1],
+            ["ACE_M84", 1, 1]
+        ]],
         _cargos select _type, _helmet, _hood, _binocular_array,
         ["ItemMap", "B_UavTerminal", _radio_item, "ItemCompass", "ChemicalDetector_01_watch_F", _night_vision]
     ]
-}
+};
+
+if (isClass(_cfgPatches >> "acre_main")) then {
+    (_loadout select 4 select 1) pushBack [_radio, 1];
+};
+
+_loadout

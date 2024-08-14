@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_debug_marker
+Function: btc_debug_fnc_marker
 
 Description:
     Fill me when you edit me !
@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        _result = [] call btc_fnc_debug_marker;
+        _result = [] call btc_debug_fnc_marker;
     (end)
 
 Author:
@@ -32,7 +32,7 @@ private _cfgVehicles = configFile >> "CfgVehicles";
     private _typeof = typeOf _x;
 
     private _alpha = 1;
-    if !((_owners select _forEachindex) isEqualTo 2) then {
+    if ((_owners select _forEachindex) isNotEqualTo 2) then {
         _alpha = 0.3;
     };
 
@@ -68,3 +68,20 @@ private _cfgVehicles = configFile >> "CfgVehicles";
         0.05
     ];
 } forEach _units;
+
+{
+    private _agent = agent _x;
+    if !(isNull _agent) then {
+        _display drawIcon [
+            getText (configOf _agent >> "Icon"),
+            [0.5, 0.5, 0.5, [1, 0.3] select (local _agent)],
+            visiblePosition _agent,
+            20,
+            20,
+            direction _agent,
+            "",
+            0,
+            0.05
+        ];
+    };
+} forEach agents;

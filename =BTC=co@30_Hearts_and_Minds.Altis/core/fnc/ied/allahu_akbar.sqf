@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_ied_allahu_akbar
+Function: btc_ied_fnc_allahu_akbar
 
 Description:
     Play song and trigger suicider bomb if suicider is alive and awake.
@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        [trigger] call btc_fnc_ied_allahu_akbar;
+        [trigger] call btc_ied_fnc_allahu_akbar;
     (end)
 
 Author:
@@ -26,10 +26,8 @@ params [
 
 private _suicider = _trigger getVariable "suicider";
 
-private _soundPath = [str missionConfigFile, 0, -15] call BIS_fnc_trimString;
-private _soundToPlay = _soundPath + "core\sounds\allahu_akbar.ogg";
 if (alive _suicider && [_suicider] call ace_common_fnc_isAwake) then {
-    playSound3d [_soundToPlay, _suicider, false, getPosASL _suicider, 5, random [0.9, 1, 1.2], 100];
+    playSound3d [getMissionPath "core\sounds\allahu_akbar.ogg", _suicider, false, getPosASL _suicider, 5, random [0.9, 1, 1.2], 100];
 };
 
 [{

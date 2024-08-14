@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_fob_create
+Function: btc_fob_fnc_create
 
 Description:
     Create user interface for FOB creation.
@@ -12,7 +12,7 @@ Returns:
 
 Examples:
     (begin example)
-        [cursorObject] call btc_fnc_fob_create;
+        [cursorObject] call btc_fob_fnc_create;
     (end)
 
 Author:
@@ -26,7 +26,7 @@ params [
 
 if (((position _mat) isFlatEmpty [1, 0, 0.9, 1, 0, false, _mat]) isEqualTo []) exitWith {(localize "STR_BTC_HAM_O_FOB_CREATE_H_AREA") call CBA_fnc_notify;};
 
-if (_mat inArea [getMarkerPos "btc_base", 2000, 2000, 0, false]) exitWith {(localize "STR_BTC_HAM_O_FOB_CREATE_H_DBASE") call CBA_fnc_notify;};
+if (_mat inArea [getMarkerPos "btc_base", btc_fob_minDistance, btc_fob_minDistance, 0, false]) exitWith {(localize "STR_BTC_HAM_O_FOB_CREATE_H_DBASE") call CBA_fnc_notify;};
 
 if ((nearestObjects [position _mat, ["LandVehicle", "Air"], 10]) findIf {!(_x isKindOf "ace_fastroping_helper")} != -1) exitWith {
     (format [localize "STR_BTC_HAM_O_FOB_CREATE_H_CAREA", (nearestObjects [position _mat, ["LandVehicle", "Air"], 10]) apply {typeOf _x}]) call CBA_fnc_notify
@@ -51,7 +51,7 @@ while {!btc_fob_dlg} do {
 if (ctrlText 777 == "") exitWith {
     closeDialog 0;
     (localize "STR_BTC_HAM_O_FOB_CREATE_H_NAME") call CBA_fnc_notify;
-    _mat spawn btc_fnc_fob_create;
+    _mat spawn btc_fob_fnc_create;
 };
 
 private _name = ctrlText 777;
@@ -63,7 +63,7 @@ private _array_markers = allMapMarkers apply {toUpper _x};
 if (_name_to_check in _array_markers) exitWith {
     closeDialog 0;
     (localize "STR_BTC_HAM_O_FOB_CREATE_H_NAMENOTA") call CBA_fnc_notify;
-    _mat spawn btc_fnc_fob_create;
+    _mat spawn btc_fob_fnc_create;
 };
 
 (localize "STR_BTC_HAM_O_FOB_CREATE_H_WIP") call CBA_fnc_notify;
@@ -81,6 +81,6 @@ closeDialog 0;
 
     deleteVehicle _mat;
 
-    [_pos, _direction, _FOB_name] remoteExecCall ["btc_fnc_fob_create_s", 2];
+    [_pos, _direction, _FOB_name] remoteExecCall ["btc_fob_fnc_create_s", 2];
     [7, _FOB_name] remoteExecCall ["btc_fnc_show_hint", [0, -2] select isDedicated];
 }, [_mat, _name], 5] call CBA_fnc_waitAndExecute;

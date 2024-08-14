@@ -1,6 +1,6 @@
 
 /* ----------------------------------------------------------------------------
-Function: btc_fnc_rep_killed
+Function: btc_rep_fnc_killed
 
 Description:
     Change reputation when a player kill a unit.
@@ -13,7 +13,7 @@ Returns:
 
 Examples:
     (begin example)
-        [cursorObject, player] call btc_fnc_rep_killed;
+        [cursorObject, player] call btc_rep_fnc_killed;
     (end)
 
 Author:
@@ -21,27 +21,40 @@ Author:
 
 ---------------------------------------------------------------------------- */
 
-params [
-    ["_unit", objNull, [objNull]],
-    ["_killer", objNull, [objNull]]
-];
+params ["_unit", "_causeOfDeath", "_killer", "_instigator"];
 
-if (!isServer) exitWith {
-    _this remoteExecCall ["btc_fnc_rep_killed", 2];
-};
+if (
+    (side group _unit isNotEqualTo civilian) &&
+    {!isAgent teamMember _unit}
+) exitWith {};
 
-if (isPlayer _killer) then {
-    btc_rep_malus_civ_killed call btc_fnc_rep_change;
-    if (btc_global_reputation < 600) then {
-        [getPos _unit] spawn btc_fnc_rep_eh_effects;
+if (
+    isPlayer _instigator ||
+    _killer isEqualTo btc_explosives_objectSide ||
+    isPlayer _killer
+) then {
+    private _isAgent = isAgent teamMember _unit;
+    if (isNull _instigator && isPlayer _killer) then {
+        _instigator = _killer;
+    };
+    [
+        [btc_rep_malus_civ_killed, btc_rep_malus_animal_killed] select _isAgent,
+        _instigator
+    ] call btc_rep_fnc_change;
+    if (btc_global_reputation < btc_rep_level_normal + 100) then {
+        [getPos _unit] call btc_rep_fnc_eh_effects;
+    };
+
+    if !(_isAgent) then {
+        private _city = (group _unit) getVariable ["btc_city", objNull];
+        if !(isNull _city) then {
+            private _civKilled = _city getVariable ["btc_rep_civKilled", []];
+            _civKilled pushBack [getPosASL _unit, getDir _unit];
+            _city setVariable ["btc_rep_civKilled", _civKilled];
+        };
     };
 
     if (btc_debug_log) then {
-        [format ["GREP %1 THIS = %2", btc_global_reputation, _this], __FILE__, [false]] call btc_fnc_debug_message;
+        [format ["GREP %1 THIS = %2", btc_global_reputation, _this], __FILE__, [false]] call btc_debug_fnc_message;
     };
-};
-
-private _vehicle = assignedVehicle _unit;
-if !(_vehicle isEqualTo objNull) then {
-    [[], [_vehicle]] call btc_fnc_delete;
 };
